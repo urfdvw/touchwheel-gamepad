@@ -5,8 +5,10 @@ import board
 import busio
 import adafruit_mpr121
 from touchwheel import TouchWheelPhysics
+import usb_hid
 i2c = busio.I2C(board.SCL, board.SDA)
 mpr121 = adafruit_mpr121.MPR121(i2c)
+from adafruit_hid.mouse import Mouse
 #%%
 wheel_phy = TouchWheelPhysics(
     up=mpr121[1],
@@ -20,9 +22,14 @@ wheel_phy = TouchWheelPhysics(
     touch_high=False
 )
 #%% test
+mouse = Mouse(usb_hid.devices)
 
-print("startplot:", "x", "y")  # For data ploting
+# print("startplot:", "x", "y")  # For data ploting
 for i in range(100000):
-    sleep(0.01)
     raw = wheel_phy.get()
-    print(raw.x, raw.y)
+    if wheel_phy.z.now > 0.8:
+        mouse.move(
+            x=int(raw.x * 10),
+            y=-int(raw.y * 10),
+        )
+    # print(raw.x, raw.y)
